@@ -1,23 +1,33 @@
 
-
 import mpmath as mp
 from scipy.optimize import brentq
 
-# Set desired precision
-mp.dps = 100  # increase if needed
+mp.dps = 100
 
-def f(x_float, n):
-    x = mp.mpf(x_float)
-    base = 1 - n * x**n - n * x**(n+1) - x**n
-    value = base**(2**n) - mp.mpf(0.5)
-    return float(value)
+def f(p_float, n):
+    p = mp.mpf(p_float)
+    base = 1 - n * p**n - n * p**(n+1) - p**n
+    return float(base**(2**n) - mp.mpf(0.5))
 
-# For example, try a large n
 n = 80
 
-# Find the root between two points; use your intuition from Desmos
-x_left = 0.0
-x_right = 1.0
+# Try values around your heuristic p ~ 0.929248
+search_range = (0.91, 0.94)
+step = 0.0005
 
-root = brentq(f, x_left + 1e-10, x_right - 1e-10, args=(n,))
-print(f"The intercept x for n={n} is approximately: {root}")
+# Scan for a sign change
+a, b = None, None
+x = search_range[0]
+while x < search_range[1]:
+    f1 = f(x, n)
+    f2 = f(x + step, n)
+    if f1 * f2 < 0:
+        a, b = x, x + step
+        break
+    x += step
+
+if a is not None and b is not None:
+    root = brentq(f, a, b, args=(n,))
+    print(f"Estimated p for n={n} is about: {root}")
+else:
+    print("Couldn't find a sign change in the given interval.")
