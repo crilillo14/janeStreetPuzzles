@@ -6,49 +6,42 @@ import sys
 # attempt a strike or swing respectively, dp that shit and get q for the state b = 0, s = 0.
 
 def getQ(xtable, p):
-
-
     # at state b , s,
     # f_{B , S} (b , s) = 
-    # / (b, s + 1) =  x^2(1 - p) + 2x(1-x)
-    # | b(b + 1, s) = (1 - x)^2
-    # \ b(HR) = px^2
+    #   P(b, s + 1) =  x^2(1 - p) + 2x(1-x)
+    #   P(b + 1, s) = (1 - x)^2
+    #   P(HR) = px^2
 
 
     qtable = np.zeros((5 , 4))
     # initiate probability at b = 4 and s = 3 to 0.
     
     
-    for b in range(4 , -1, -1):
-        for s in range(3 , -1, -1): 
+    for balls in range(4 , -1, -1):
+        for strikes in range(3 , -1, -1): 
             
-            if b == 4 or s == 3:
-                qtable[b][s] = 0.0
+            if balls == 4 or strikes == 3:
+                qtable[balls][strikes] = 0.0
 
-            elif b == 3 and s == 2:
-                qtable[b][s] = 1.0
+            elif balls == 3 and strikes == 2:
+                qtable[balls][strikes] = 1.0
 
             else:
 
-                pnextStrike = qtable[b][s + 1]
-                pnextBall = qtable[b + 1][s]
+                pnextStrike = qtable[balls][strikes + 1]
+                pnextBall = qtable[balls + 1][strikes]
 
 
-                x = xtable[b][s]
+                x = xtable[balls][strikes]
 
                 a = (x**2)*(1 - p) + 2*x*(1-x)
                 b = (1 - x)**2
 
-                qtable[b][s] = a * pnextStrike + b*pnextBall
+                qtable[balls][strikes] = a * pnextStrike + b*pnextBall
 
-    return qtable[0][0]
+    return qtable[0][0] 
 
-                
-
-
-
-
-def dp(p : np.float64):
+def dp(p):
 
     evtable = np.zeros((5 , 4))
     xtable = np.zeros((5, 4))
@@ -74,29 +67,55 @@ def dp(p : np.float64):
                 evtable[b][s] = ((1 - x)**2) * nextBall + 2 * x * (1 - x) * nextStrike + (x**2)*(4*p + (1 - p)*nextStrike) 
                 xtable[b][s] = x
 
-    q = getQ(xtable)
+    q = getQ(xtable, p)
 
     return q
 
 
 def main():
 
-    iterations = sys.argv[1]
+    log = {}
 
+    """
+    try: 
+        iterations = int(sys.argv[1])
+    except Exception as e:
+        iterations = 1
+        raise e
+
+
+    """
+    iterations = 1
     l , h = 0.0 , 1.0
 
     qvals = np.zeros(10)
-    for i in range(iterations): 
 
+    for i in range(iterations): 
+        print("entered iteration loop")
         # build new range for prange
-        prange = np.arange(l, h, (l - h) / 10.0)
+
+        prange = np.arange(l, h, (h - l) / 10.0)
+        print(prange)
 
         for i , pval in enumerate(prange):
+            print("entered pval loop")
             qvals[i] = dp(pval)
 
+            print(f"got q = {qvals[i]}")
+            log[pval] = qvals[i]
+
         
+        
+
         imax = np.argmax(qvals)
         # zoom in
         l = qvals[imax] - ((l - h) / 10.0)
         h = qvals[imax] + ((l - h) / 10.0)
 
+
+    print("Finalized. Log of run is as follows: ")
+    print(log)
+
+
+if __name__ == "__main__":
+    main()
