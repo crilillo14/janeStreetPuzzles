@@ -1,5 +1,5 @@
 import numpy as np
-import sys
+import sys # to get kwargs
 
 
 # given some p, and some tensor of probabilities that pitchers and batters at some point 
@@ -109,8 +109,8 @@ def main():
 
         imax = np.argmax(qvals)
         # zoom in
-        l = qvals[imax] - ((l - h) / 10.0)
-        h = qvals[imax] + ((l - h) / 10.0)
+        l = prange[imax] - ((l - h) / 10.0)
+        h = prange[imax] + ((l - h) / 10.0)
 
 
     print("Finalized. Log of run is as follows: ")
